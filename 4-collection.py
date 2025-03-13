@@ -1,3 +1,4 @@
+import json
 import math
 
 PER_PAGE = 5
@@ -58,100 +59,43 @@ def select_length(album):
 def select_year(album):
     return album["year"]
 
-def load_collection():
-    """
-    Creates a test collection. Returns a list that contains dictionaries of
-    five key-value pairs.
-    Dictionary keys match the following information:
-    "artist" - name of the album artist
-    "album" - title of the album
-    "no_tracks" - number of tracks
-    "length" - total length
-    "year" - release year
-    """
+def read_row(row, collection):
+    try:
+        artist, album, no_tracks, length, year = row.split(",")
+        newalbum = {
+            "artist": artist.strip(),
+            "album": album.strip(),
+            "no_tracks": int(no_tracks),
+            "length": length.strip(),
+            "year": int(year)
+        }
+        collection.append(newalbum)
+    except ValueError:
+        print(f"Unable to read row: {row}")
 
-    collection = [
-        {
-            "artist": "Alcest",
-            "album": "Kodama",
-            "no_tracks": 6,
-            "length": "0:42:15",
-            "year": 2016
-        },
-        {
-            "artist": "Canaan",
-            "album": "A Calling to Weakness",
-            "no_tracks": 17,
-            "length": "1:11:17",
-            "year": 2002
-        },
-        {
-            "artist": "Deftones",
-            "album": "Gore",
-            "no_tracks": 11,
-            "length": "0:48:13",
-            "year": 2016
-        },
-        {
-            "artist": "Funeralium",
-            "album": "Deceived Idealism",
-            "no_tracks": 6,
-            "length": "1:28:22",
-            "year": 2013
-        },
-        {
-            "artist": "IU",
-            "album": "Modern Times",
-            "no_tracks": 13,
-            "length": "0:47:14",
-            "year": 2013
-        },
-        {
-            "artist": "Mono",
-            "album": "You Are There",
-            "no_tracks": 6,
-            "length": "1:00:01",
-            "year": 2006
-        },
-        {
-            "artist": "Panopticon",
-            "album": "Roads to the North",
-            "no_tracks": 8,
-            "length": "1:11:07",
-            "year": 2014
-        },
-        {
-            "artist": "Scandal",
-            "album": "Hello World",
-            "no_tracks": 13,
-            "length": "0:53:22",
-            "year": 2014
-        },
-        {
-            "artist": "Slipknot",
-            "album": "Iowa",
-            "no_tracks": 14,
-            "length": "1:06:24",
-            "year": 2001
-        },
-        {
-            "artist": "Wolves in the Throne Room",
-            "album": "Thrice Woven",
-            "no_tracks": 5,
-            "length": "0:42:19",
-            "year": 2017
-        },
-    ]
+def load_collection(filename):
+    # The order of values in each row corresponds to dictionary keys:
+    # 1. "artist" - artist name
+    # 2. "album" - album title
+    # 3. "no_tracks" - number of tracks
+    # 4. "length" - album length
+    # 5. "year" - release year
+    collection = []
+    try:
+        with open(filename) as source:
+            for row in source.readlines():
+                read_row(row, collection)
+    except IOError:
+        print("Unable to open the target file. Starting with an empty collection.")
     return collection
 
 def save_collection(collection, filename):
     try:
         with open(filename, "w") as target:
-            for album in collection:
+            for i, album in enumerate(collection):
                 target.write(
-                    f"{i:2}. "
-                    f"{album['artist']} - {album['album']} ({album['year']}) "
-                    f"[{album['no_tracks']}] [{album['length'].lstrip('0:')}]\n"
+                    f"{album['artist']}, {album['album']}, {album['no_tracks']}, "
+                    f"{album['length'].lstrip('0:')}, {album['year']}\n"
                 )
     except IOError:
         print("Unable to open the target file. Saving failed.")
@@ -273,7 +217,7 @@ def organize(collection):
     else:
         print("Field doesn't exist")
 
-collection = load_collection()
+collection = load_collection("collection.txt")
 print("This program manages an album collection. You can use the following features:")
 print("(A)dd new albums")
 print("(E)dit albums")
