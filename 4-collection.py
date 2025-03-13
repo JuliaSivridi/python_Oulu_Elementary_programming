@@ -1,3 +1,4 @@
+import sys
 import json
 import math
 
@@ -59,44 +60,20 @@ def select_length(album):
 def select_year(album):
     return album["year"]
 
-def read_row(row, collection):
-    try:
-        artist, album, no_tracks, length, year = row.split(",")
-        newalbum = {
-            "artist": artist.strip(),
-            "album": album.strip(),
-            "no_tracks": int(no_tracks),
-            "length": length.strip(),
-            "year": int(year)
-        }
-        collection.append(newalbum)
-    except ValueError:
-        print(f"Unable to read row: {row}")
-
 def load_collection(filename):
-    # The order of values in each row corresponds to dictionary keys:
-    # 1. "artist" - artist name
-    # 2. "album" - album title
-    # 3. "no_tracks" - number of tracks
-    # 4. "length" - album length
-    # 5. "year" - release year
-    collection = []
     try:
         with open(filename) as source:
-            for row in source.readlines():
-                read_row(row, collection)
-    except IOError:
+            collection = json.load(source)
+    except (IOError, json.JSONDecodeError):
         print("Unable to open the target file. Starting with an empty collection.")
+        collection = []
+
     return collection
 
 def save_collection(collection, filename):
     try:
         with open(filename, "w") as target:
-            for i, album in enumerate(collection):
-                target.write(
-                    f"{album['artist']}, {album['album']}, {album['no_tracks']}, "
-                    f"{album['length'].lstrip('0:')}, {album['year']}\n"
-                )
+            json.dump(collection, target)
     except IOError:
         print("Unable to open the target file. Saving failed.")
 
@@ -217,28 +194,50 @@ def organize(collection):
     else:
         print("Field doesn't exist")
 
-collection = load_collection("collection.txt")
-print("This program manages an album collection. You can use the following features:")
-print("(A)dd new albums")
-print("(E)dit albums")
-print("(R)emove albums")
-print("(S)how the collection")
-print("(O)rganize the collection")
-print("(Q)uit")
-while True:
-    choice = input("Make your choice: ").strip().lower()
-    if choice == "a":
-        add(collection)
-    if choice == "e":
-        edit(collection)
-    elif choice == "r":
-        remove(collection)
-    elif choice == "s":
-        show(collection)
-    elif choice == "o":
-        organize(collection)
-    elif choice == "q":
-        break
+def read_arguments(arguments):
+    if len(arguments) >= 3:
+        source = arguments[1]
+        target = arguments[2]
+        return source, target
+    elif len(arguments) == 2:
+        source = arguments[1]
+        return source, source
     else:
-        print("The chosen feature is not available.")
-save_collection(collection, "collection.txt")
+        return None, None
+
+def menu(source_file, target_file):
+    collection = load_collection(source_file)
+    print("This program manages an album collection. You can use the following features:")
+    print("(A)dd new albums")
+    print("(E)dit albums")
+    print("(R)emove albums")
+    print("(S)how the collection")
+    print("(O)rganize the collection")
+    print("(Q)uit")
+    while True:
+        choice = input("Make your choice: ").strip().lower()
+        if choice == "a":
+            add(collection)
+        elif choice == "e":
+            edit(collection)
+        elif choice == "r":
+            remove(collection)
+        elif choice == "s":
+            show(collection)
+        elif choice == "o":
+            organize(collection)
+        elif choice == "q":
+            break
+        else:
+            print("The chosen feature is not available.")
+    save_collection(collection, target_file)
+
+source, target = read_arguments(sys.argv)
+if source:
+    try:
+        menu(source, target)
+    except KeyboardInterrupt:
+        print("Program was interrupted, collection was not saved.")
+else:
+    print("Usage:")
+    print("python collection.py source_file (target_file)")
