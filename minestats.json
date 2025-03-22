@@ -1,0 +1,44 @@
+[
+    {
+        "start": "2025-03-22 14:52:08",
+        "duration": 0,
+        "turns": 3,
+        "outcome": "lose",
+        "mines_left": 3
+    },
+    {
+        "start": "2025-03-22 14:52:37",
+        "duration": 3,
+        "turns": 1,
+        "outcome": "lose",
+        "mines_left": 10
+    },
+    {
+        "start": "2025-03-22 14:56:55",
+        "duration": 0,
+        "turns": 1,
+        "outcome": "lose",
+        "mines_left": 10
+    },
+    {
+        "start": "2025-03-22 14:57:03",
+        "duration": 0,
+        "turns": 17,
+        "outcome": "win",
+        "mines_left": 0
+    },
+    {
+        "start": "2025-03-22 14:57:49",
+        "duration": 8,
+        "turns": 78,
+        "outcome": "win",
+        "mines_left": 0
+    },
+    {
+        "start": "2025-03-22 15:07:08",
+        "duration": 0,
+        "turns": 3,
+        "outcome": "lose",
+        "mines_left": 13
+    }
+]
